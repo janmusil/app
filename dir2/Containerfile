@@ -10,10 +10,14 @@ RUN yum install -y httpd && \
 
 ONBUILD COPY src/ ${DOCROOT}/
 
-EXPOSE 80
+EXPOSE 8080
 
-RUN rm -rf /run/httpd && mkdir /run/httpd
+LABEL io.openshift.expose-services="8080:http"
 
-USER root
+RUN sed -i "s/Listen 80/Listen 8080/g" /etc/https/conf/https.conf
+
+RUN chgrp -R 0 /var/log/https /var/run/httpd && \
+    chmod -R g=u /var/log/https /var/run/httpd
+USER 1001
 
 CMD /usr/sbin/httpd -DFOREGROUND
